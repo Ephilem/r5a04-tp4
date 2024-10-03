@@ -1,0 +1,21 @@
+services:
+  user-db:
+    image: mariadb:latest
+    container_name: user-db
+    ports:
+      - "3350:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: user_db
+        MYSQL_USER: user
+        MYSQL_PASSWORD: passwordsupersecure
+  activity-db:
+    image: mariadb:latest
+    container_name: activity-db
+    ports:
+      - "3351:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: activity_db
+        MYSQL_USER: user
+        MYSQL_PASSWORD: passwordsupersecure

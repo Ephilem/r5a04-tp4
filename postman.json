@@ -1,0 +1,998 @@
+{
+	"info": {
+		"_postman_id": "d3f3c11e-a5bc-4bfa-9bca-2d912a3c9031",
+		"name": "Test SportTrack",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10889909"
+	},
+	"item": [
+		{
+			"name": "Auth testing",
+			"item": [
+				{
+					"name": "Add admin user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{trueToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"email\": \"admin@gmail.com\",\n    \"password\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/users",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Authenticate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"",
+									"pm.test(\"Content type is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token format is valid\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"User object has required fields - id, username, and email\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.user).to.have.property('id').that.is.a('number');",
+									"    pm.expect(responseData.user).to.have.property('username').that.is.a('string');",
+									"    pm.expect(responseData.user).to.have.property('email').that.is.a('string');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/authenticate",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Authenticate Wrong",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 401\", function () {",
+									"  pm.expect(pm.response.code).to.equal(401);",
+									"});",
+									"",
+									"",
+									"",
+									"pm.test(\"Validate the response schema\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.timestamp).to.exist;",
+									"    pm.expect(responseData.status).to.exist;",
+									"    pm.expect(responseData.error).to.exist;",
+									"    pm.expect(responseData.message).to.exist;",
+									"",
+									"    pm.expect(responseData.message).equals(\"Invalid username or password\")",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"adminn\",\n    \"password\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/authenticate",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Activity requests",
+			"item": [
+				{
+					"name": "Create Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 201\", function () {",
+									"  pm.expect(pm.response.code).to.equal(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.date).to.exist;",
+									"    pm.expect(responseData.description).to.exist;",
+									"    pm.expect(responseData.distance).to.exist;",
+									"    pm.expect(responseData.freq_min).to.exist;",
+									"    pm.expect(responseData.freq_max).to.exist;",
+									"    pm.expect(responseData.data).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Time in the 'data' array is in a valid format\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.data).to.be.an('array');",
+									"    responseData.data.forEach(function(item) {",
+									"        pm.expect(item.time).to.match(/^\\d{2}:\\d{2}:\\d{2}$/);",
+									"    });",
+									"});",
+									"",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"activityId\", jsonData.id);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"date\": \"02/01/2029\",\n    \"description\": \"IUT -> RU\",\n    \"distance\": 7611,\n    \"freq_min\": 63,\n    \"freq_max\": 179,\n    \"data\": [\n      {\n        \"time\": \"13:00:00\",\n        \"cardioFrequency\": 99,\n        \"latitude\": 47.644794,\n        \"longitude\": -2.776605,\n        \"altitude\": 18.0\n      },\n      {\n        \"time\": \"13:00:05\",\n        \"cardioFrequency\": 100,\n        \"latitude\": 47.64687,\n        \"longitude\": -2.778911,\n        \"altitude\": 18.0\n      },\n      {\n        \"time\": \"13:00:10\",\n        \"cardioFrequency\": 102,\n        \"latitude\": 47.6462,\n        \"longitude\": -2.78022,\n        \"altitude\": 18.0\n      },\n      {\n        \"time\": \"13:00:15\",\n        \"cardioFrequency\": 100,\n        \"latitude\": 47.64699,\n        \"longitude\": -2.781068,\n        \"altitude\": 17.0\n      },\n      {\n        \"time\": \"13:00:20\",\n        \"cardioFrequency\": 98,\n        \"latitude\": 47.647865,\n        \"longitude\": -2.781744,\n        \"altitude\": 16.0\n      },\n      {\n        \"time\": \"13:00:25\",\n        \"cardioFrequency\": 103,\n        \"latitude\": 47.64851,\n        \"longitude\": -2.780145,\n        \"altitude\": 16.0\n      }\n    ]\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostActivity}}/activities",
+							"host": [
+								"{{hostActivity}}"
+							],
+							"path": [
+								"activities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.date).to.exist;",
+									"    pm.expect(responseData.description).to.exist;",
+									"    pm.expect(responseData.distance).to.exist;",
+									"    pm.expect(responseData.freq_min).to.exist;",
+									"    pm.expect(responseData.freq_max).to.exist;",
+									"    pm.expect(responseData.data).to.exist;",
+									"});",
+									"",
+									"pm.test(\"Id matches the activityId variable\", function () {",
+									"  const responseData = pm.response.json();",
+									"  pm.expect(responseData.id).to.equal(pm.variables.get(\"activityId\"));",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostActivity}}/activities/{{activityId}}",
+							"host": [
+								"{{hostActivity}}"
+							],
+							"path": [
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response schema for the updated activity object\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.date).to.exist;",
+									"    pm.expect(responseData.description).to.exist;",
+									"    pm.expect(responseData.distance).to.exist;",
+									"    pm.expect(responseData.freq_min).to.exist;",
+									"    pm.expect(responseData.freq_max).to.exist;",
+									"    pm.expect(responseData.data).to.exist;",
+									"",
+									"});",
+									"",
+									"",
+									"pm.test(\"Description is modified to 'Super description !!!!!'\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.description).to.equal('Super description !!!!!');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": {{activityId}},\n    \"date\": \"02/01/2020\",\n    \"description\": \"Super description !!!!!\",\n    \"distance\": 7611,\n    \"freq_min\": 63,\n    \"freq_max\": 179,\n    \"data\": [\n      {\n        \"time\": \"13:00:00\",\n        \"cardioFrequency\": 99,\n        \"latitude\": 47.644794,\n        \"longitude\": -2.776605,\n        \"altitude\": 18.0\n      },\n      {\n        \"time\": \"13:00:05\",\n        \"cardioFrequency\": 100,\n        \"latitude\": 47.64687,\n        \"longitude\": -2.778911,\n        \"altitude\": 18.0\n      },\n      {\n        \"time\": \"13:00:10\",\n        \"cardioFrequency\": 102,\n        \"latitude\": 47.6462,\n        \"longitude\": -2.78022,\n        \"altitude\": 18.0\n      },\n      {\n        \"time\": \"13:00:15\",\n        \"cardioFrequency\": 100,\n        \"latitude\": 47.64699,\n        \"longitude\": -2.781068,\n        \"altitude\": 17.0\n      },\n      {\n        \"time\": \"13:00:20\",\n        \"cardioFrequency\": 98,\n        \"latitude\": 47.647865,\n        \"longitude\": -2.781744,\n        \"altitude\": 16.0\n      },\n      {\n        \"time\": \"13:00:25\",\n        \"cardioFrequency\": 103,\n        \"latitude\": 47.64851,\n        \"longitude\": -2.780145,\n        \"altitude\": 16.0\n      }\n    ]\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostActivity}}/activities/{{activityId}}",
+							"host": [
+								"{{hostActivity}}"
+							],
+							"path": [
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 204\", function () {",
+									"  pm.expect(pm.response.code).to.equal(204);",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{hostActivity}}/activities/{{activityId}}",
+							"host": [
+								"{{hostActivity}}"
+							],
+							"path": [
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Paginate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content has 5 elements\", function () {",
+									"    var responseData = pm.response.json();",
+									"    var content = responseData.content;",
+									"",
+									"    pm.expect(content.length).to.equal(5, \"Content should have 5 elements\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostActivity}}/activities?page=0&size=5",
+							"host": [
+								"{{hostActivity}}"
+							],
+							"path": [
+								"activities"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Paginate and Search",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains at least one element in the content\", function () {",
+									"    pm.expect(pm.response.json().content.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test(\"Description of the first element contains 'IUT'\", function () {",
+									"    pm.expect(pm.response.json().content[0].description).to.include('IUT');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostActivity}}/activities?page=0&size=5&search=IUT",
+							"host": [
+								"{{hostActivity}}"
+							],
+							"path": [
+								"activities"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								},
+								{
+									"key": "search",
+									"value": "IUT"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trueToken}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "User request",
+			"item": [
+				{
+					"name": "Create user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 201\", function () {",
+									"    pm.expect(pm.response.code).to.equal(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id, username, and email\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('username');",
+									"    pm.expect(responseData).to.have.property('email');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Username and email must be non-empty strings\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.username).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+									"    pm.expect(responseData.email).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Email should not be empty\");",
+									"});",
+									"",
+									"",
+									"// Set the variable userId to the value of the \"id\" key in the response body",
+									"var userId = pm.response.json().id;",
+									"pm.environment.set(\"userId\", userId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testy45\",\n    \"email\": \"testy45@gmail.com\",\n    \"password\": \"testy45\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/users",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create user Conflict",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 409\", function () {",
+									"    pm.expect(pm.response.code).to.equal(409);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('timestamp');",
+									"    pm.expect(responseData).to.have.property('status');",
+									"    pm.expect(responseData).to.have.property('error');",
+									"    pm.expect(responseData).to.have.property('message');",
+									"",
+									"    pm.expect(responseData.message).equals(\"User already exist\")",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testy45\",\n    \"email\": \"testy45@gmail.com\",\n    \"password\": \"testy45\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/users",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Created User password valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"  const responseData = pm.response.json();",
+									"",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.token).to.exist;",
+									"  pm.expect(responseData.user).to.be.an('object');",
+									"  pm.expect(responseData.user.id).to.exist;",
+									"  pm.expect(responseData.user.username).to.exist;",
+									"  pm.expect(responseData.user.email).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token is a non-empty string\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testy45\",\n    \"password\": \"testy45\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/authenticate",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id, username, and email\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('username');",
+									"    pm.expect(responseData).to.have.property('email');",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testy45\",\n    \"email\": \"testy45@gmail.com\",\n    \"password\": \"testy50\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/users/{{userId}}",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Updated User password valid Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"  const responseData = pm.response.json();",
+									"",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.token).to.exist;",
+									"  pm.expect(responseData.user).to.be.an('object');",
+									"  pm.expect(responseData.user.id).to.exist;",
+									"  pm.expect(responseData.user.username).to.exist;",
+									"  pm.expect(responseData.user.email).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token is a non-empty string\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testy45\",\n    \"password\": \"testy50\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostUser}}/authenticate",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"pm.test(\"Response has the required fields - id, username, and email\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('username');",
+									"    pm.expect(responseData).to.have.property('email');",
+									"});",
+									"",
+									"pm.test(\"User ID matches the requested ID\", function () {",
+									"    const userId = pm.variables.get(\"userId\");",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.id).to.equal(userId);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostUser}}/users/{{userId}}",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 204\", function () {",
+									"  pm.expect(pm.response.code).to.equal(204);",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{hostUser}}/users/{{userId}}",
+							"host": [
+								"{{hostUser}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trueToken}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "hostActivity",
+			"value": "localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "hostUser",
+			"value": "localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "trueToken",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcxNzM0OTM3MiwiZXhwIjoxNzE3NDM1NzcyfQ.HphbyfpVOQ798h3v5iHjVRJxU5wcubsyfk8m1FT5ToE",
+			"type": "string"
+		},
+		{
+			"key": "activityId",
+			"value": "15",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "7",
+			"type": "string"
+		}
+	]
+}
