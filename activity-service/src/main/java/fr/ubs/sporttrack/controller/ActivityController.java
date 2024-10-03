@@ -70,9 +70,9 @@ public class ActivityController {
             @ApiResponse(responseCode = "404", description = "Activity not found")
     })
     @GetMapping(path = "/{id}", produces = "application/json")
-    public ResponseEntity<?> getActivityById(@PathVariable int id) throws ActivityNotFoundException {
+    public ResponseEntity<?> getActivityById(@PathVariable long id) throws ActivityNotFoundException {
         return activityService.findById(id)
-                .map(activity -> ResponseEntity.ok(activity))
+                .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ActivityNotFoundException(id));
     }
 
@@ -107,7 +107,7 @@ public class ActivityController {
             @ApiResponse(responseCode = "404", description = "Activity not found")
     })
     @PutMapping(path = "/{id}", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<?> updateActivity(@PathVariable int id, @Valid @RequestBody Activity activity) throws ActivityNotFoundException {
+    public ResponseEntity<?> updateActivity(@PathVariable long id, @Valid @RequestBody Activity activity) throws ActivityNotFoundException {
         activity.setId(id);
 
         return new ResponseEntity<>(activityService.update(activity), HttpStatus.OK);

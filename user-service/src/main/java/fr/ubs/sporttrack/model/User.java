@@ -34,6 +34,7 @@ public class User {
     @NotBlank(message = "Email cannot be blank")
     private String email;
 
+    @Column(nullable = false)
     @NotBlank(message = "Password cannot be blank")
     private String password;
 

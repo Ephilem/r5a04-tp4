@@ -1,22 +1,30 @@
 package fr.ubs.sporttrack.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 /**
- * Represents a mesurement of an activity. Can be multiple per activity.
+ * Represents a measurement of an activity. Can be multiple per activity.
  *
  * @see Activity
  * @author Raphael AIME
  */
+@Entity
+@Table(name = "activity_data")
 public class ActivityData {
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
         @JsonProperty("time")
-        @NotNull(message = "Timestamp cannot be null.")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+        @NotNull(message = "Timestamp cannot be null.")
+        @Temporal(TemporalType.TIME)
         private Date timestamp;
 
         @JsonProperty("cardioFrequency")
@@ -38,7 +46,15 @@ public class ActivityData {
         @NotNull(message = "Altitude cannot be null")
         private float altitude;
 
+        @ManyToOne(optional = false)
+        @JoinColumn(name = "activity_id", nullable = false)
+        private Activity activity;
+
         // Getters
+        public Long getId() {
+                return id;
+        }
+
         public Date getTimestamp() {
                 return timestamp;
         }
@@ -79,4 +95,9 @@ public class ActivityData {
         public void setAltitude(float altitude) {
                 this.altitude = altitude;
         }
+
+        public void setActivity(Activity activity) {
+                this.activity = activity;
+        }
+
 }

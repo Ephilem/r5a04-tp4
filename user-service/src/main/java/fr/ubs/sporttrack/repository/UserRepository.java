@@ -1,13 +1,12 @@
 package fr.ubs.sporttrack.repository;
 
-import fr.ubs.sporttrack.exception.UserAlreadyExistException;
-import fr.ubs.sporttrack.exception.UserNotFoundException;
 import fr.ubs.sporttrack.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -15,23 +14,18 @@ import java.util.Optional;
  *
  * @author Raphael AIME
  */
-public interface UserRepository extends PagingAndSortingRepository<User, Integer> {
-
-    /**
-     * Retrieves all users.
-     *
-     * @return the list of all users
-     */
-    List<User> findAll();
+@Repository
+public interface UserRepository extends JpaRepository<User, Integer> {
 
     /**
      * Finds users by username containing a search query, ignoring case, with pagination and sorting.
      *
-     * @param description the search query
+     * @param username the search query
      * @param pageable the pagination and sorting information
      * @return a paginated list of users matching the search query
      */
-    Page<User> findByUsernameContainingIgnoreCase(String description, Pageable pageable);
+    @NonNull
+    Page<User> findByUsernameContainingIgnoreCase(@NonNull String username, @NonNull Pageable pageable);
 
     /**
      * Searches for a user by their username.
@@ -39,7 +33,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Integer
      * @param username the username to search for
      * @return an {@link Optional} containing the user with the given username if found, or empty otherwise
      */
-    Optional<User> findByUsername(String username);
+    @NonNull
+    Optional<User> findByUsername(@NonNull String username);
 
     /**
      * Searches for a user by their email.
@@ -47,56 +42,22 @@ public interface UserRepository extends PagingAndSortingRepository<User, Integer
      * @param email the email to search for
      * @return an {@link Optional} containing the user with the given email if found, or empty otherwise
      */
-    Optional<User> findByEmail(String email);
+    @NonNull
+    Optional<User> findByEmail(@NonNull String email);
 
     /**
-     * Finds a user by their ID.
+     * Checks if a user exists by their username.
      *
-     * @param id the ID of the user to find
-     * @return an {@link Optional} containing the user with the given ID if found, or empty otherwise
+     * @param username the username to check
+     * @return {@code true} if a user with the given username exists, {@code false} otherwise
      */
-    Optional<User> findById(int id);
+    boolean existsByUsername(@NonNull String username);
 
     /**
-     * Checks if a user exists by their ID.
+     * Checks if a user exists by their email.
      *
-     * @param id the ID of the user to check
-     * @return {@code true} if the user exists, {@code false} otherwise
+     * @param email the email to check
+     * @return {@code true} if a user with the given email exists, {@code false} otherwise
      */
-    boolean isExist(int id);
-
-    /**
-     * Saves a new user.
-     * If the ID or username is already used, throws a {@link UserAlreadyExistException}.
-     * If the ID is not set (inferior or equal to 0), sets it to the next available ID.
-     *
-     * @param user the user to save
-     * @return the saved user
-     * @throws UserAlreadyExistException if a user with the same ID already exists
-     */
-    User save(User user) throws UserAlreadyExistException;
-
-    /**
-     * Deletes a user by their ID.
-     *
-     * @param id the ID of the user to delete
-     * @throws UserNotFoundException if the user with the given ID is not found
-     */
-    void deleteById(int id) throws UserNotFoundException;
-
-    /**
-     * Updates an existing user.
-     *
-     * @param user the user to update
-     * @return the updated user
-     * @throws UserNotFoundException if the user with the given ID is not found
-     */
-    User update(User user) throws UserNotFoundException;
-
-    /**
-     * Counts the total number of users.
-     *
-     * @return the number of users
-     */
-    int count();
+    boolean existsByEmail(@NonNull String email);
 }

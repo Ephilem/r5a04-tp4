@@ -1,11 +1,11 @@
 package fr.ubs.sporttrack.model;
 
+import java.util.Date;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Date;
-import java.util.List;
-
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 /**
@@ -13,21 +13,23 @@ import jakarta.validation.constraints.*;
  *
  * @author Raphael AIME
  */
+@Entity
+@Table(name = "activities")
 public class Activity {
-        @JsonProperty("id")
-        @Min(value = 1, message = "ID must be positive")
-        private int id;
 
-        @JsonProperty("date")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
         @NotNull(message = "Date cannot be null")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+        @Temporal(TemporalType.DATE)
         private Date date;
 
-        @JsonProperty("description")
         @NotBlank(message = "Description cannot be blank")
+        @Column(nullable = false)
         private String description;
 
-        @JsonProperty("distance")
         @Min(value = 1, message = "Distance must be greater than zero")
         private int distance; // in meters
 
@@ -42,12 +44,13 @@ public class Activity {
         private int freqMax;
 
         @JsonProperty("data")
+        @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
         @NotNull(message = "Data points cannot be null")
         @Size(min = 1, message = "At least one data point is required")
-        private List<ActivityData> points;
+        private Set<ActivityData> points;
 
         // Getters
-        public int getId() {
+        public Long getId() {
                 return id;
         }
 
@@ -71,14 +74,13 @@ public class Activity {
                 return freqMax;
         }
 
-        public List<ActivityData> getPoints() {
+        public Set<ActivityData> getPoints() {
                 return points;
         }
 
         // Setters
-        public Activity setId(int id) {
+        public void setId(Long id) {
                 this.id = id;
-                return this;
         }
 
         public Activity setDate(Date date) {
@@ -106,7 +108,7 @@ public class Activity {
                 return this;
         }
 
-        public Activity setPoints(List<ActivityData> points) {
+        public Activity setPoints(Set<ActivityData> points) {
                 this.points = points;
                 return this;
         }

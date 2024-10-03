@@ -6,18 +6,18 @@ package fr.ubs.sporttrack.exception;
  * @author Raphael AIME
  */
 public class ActivityNotFoundException extends Exception {
-    private final int id;
+    private final long id;
 
     /**
      * Constructor
      * @param id the id of the not found activity
      */
-    public ActivityNotFoundException(int id) {
+    public ActivityNotFoundException(long id) {
         super("Activity not found with id: " + id);
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 }

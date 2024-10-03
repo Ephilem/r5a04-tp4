@@ -3,6 +3,7 @@ package fr.ubs.sporttrack.service;
 import fr.ubs.sporttrack.exception.ActivityAlreadyExistException;
 import fr.ubs.sporttrack.exception.ActivityNotFoundException;
 import fr.ubs.sporttrack.model.Activity;
+import fr.ubs.sporttrack.model.ActivityData;
 import fr.ubs.sporttrack.repository.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -61,8 +62,8 @@ public class ActivityService {
      * @param id the ID of the activity to retrieve
      * @return an {@code Optional} containing the found activity, or empty if no activity found
      */
-    public Optional<Activity> findById(int id) {
-        return activityRepository.findById(id);
+    public Optional<Activity> findById(long id) {
+        return activityRepository.findByIdWithActivityData(id);
     }
 
     /**
@@ -73,6 +74,17 @@ public class ActivityService {
      * @throws ActivityAlreadyExistException if an activity with the same ID already exists
      */
     public Activity save(Activity activity) throws ActivityAlreadyExistException {
+        if (activity.getId() != null && activityRepository.existsById(activity.getId())) {
+            throw new ActivityAlreadyExistException();
+        }
+
+        // Set the activity reference for each ActivityData
+        if (activity.getPoints() != null) {
+            for (ActivityData data : activity.getPoints()) {
+                data.setActivity(activity);
+            }
+        }
+
         return activityRepository.save(activity);
     }
 
@@ -82,7 +94,10 @@ public class ActivityService {
      * @param id the ID of the activity to delete
      * @throws ActivityNotFoundException if no activity with the specified ID is found
      */
-    public void deleteById(int id) throws ActivityNotFoundException {
+    public void deleteById(long id) throws ActivityNotFoundException {
+        if (!activityRepository.existsById(id)) {
+            throw new ActivityNotFoundException(id);
+        }
         activityRepository.deleteById(id);
     }
 
@@ -94,7 +109,18 @@ public class ActivityService {
      * @throws ActivityNotFoundException if no activity with the specified ID is found
      */
     public Activity update(Activity activity) throws ActivityNotFoundException {
-        return activityRepository.update(activity);
+        if (!activityRepository.existsById(activity.getId())) {
+            throw new ActivityNotFoundException(activity.getId());
+        }
+
+        // Set the activity reference for each ActivityData
+        if (activity.getPoints() != null) {
+            for (ActivityData data : activity.getPoints()) {
+                data.setActivity(activity);
+            }
+        }
+
+        return activityRepository.saveAndFlush(activity);
     }
 
     /**
@@ -102,7 +128,9 @@ public class ActivityService {
      *
      * @return the total count of activities
      */
-    public int count() {
+    public long count() {
         return activityRepository.count();
     }
+
+
 }

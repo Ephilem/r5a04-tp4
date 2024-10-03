@@ -1,30 +1,25 @@
 package fr.ubs.sporttrack.repository;
 
-import fr.ubs.sporttrack.exception.ActivityAlreadyExistException;
-import fr.ubs.sporttrack.exception.ActivityNotFoundException;
 import fr.ubs.sporttrack.model.Activity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Date;
 import java.util.Optional;
 
 /**
  * Repository interface for managing {@link Activity} entities.
- * Provides methods for pagination, sorting, and searching.
  *
  * @author Raphael AIME
  */
-public interface ActivityRepository extends PagingAndSortingRepository<Activity, Integer> {
-
-    /**
-     * Retrieves all activities.
-     *
-     * @return the list of all activities
-     */
-    List<Activity> findAll();
+@Repository
+public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     /**
      * Finds activities by description containing a search query, ignoring case, with pagination and sorting.
@@ -33,56 +28,65 @@ public interface ActivityRepository extends PagingAndSortingRepository<Activity,
      * @param pageable the pagination and sorting information
      * @return a paginated list of activities matching the search query
      */
-    Page<Activity> findByDescriptionContainingIgnoreCase(String description, Pageable pageable);
+    @NonNull
+    Page<Activity> findByDescriptionContainingIgnoreCase(@NonNull String description, @NonNull Pageable pageable);
 
     /**
-     * Finds an activity by its ID.
+     * Finds activities by date.
      *
-     * @param id the ID of the activity to find
-     * @return an {@code Optional} containing the found activity, or empty if no activity is found
+     * @param date the date to search for
+     * @param pageable the pagination and sorting information
+     * @return a paginated list of activities on the given date
      */
-    Optional<Activity> findById(int id);
+    @NonNull
+    Page<Activity> findByDate(@NonNull Date date, @NonNull Pageable pageable);
 
     /**
-     * Checks if an activity exists by its ID.
+     * Finds activities within a date range.
      *
-     * @param id the ID of the activity to check
-     * @return {@code true} if the activity exists, {@code false} otherwise
+     * @param startDate the start date of the range
+     * @param endDate the end date of the range
+     * @param pageable the pagination and sorting information
+     * @return a paginated list of activities within the given date range
      */
-    boolean isExist(int id);
+    @NonNull
+    Page<Activity> findByDateBetween(@NonNull Date startDate, @NonNull Date endDate, @NonNull Pageable pageable);
 
     /**
-     * Saves a new activity.
-     * If the ID is already used, throws an {@link ActivityAlreadyExistException}.
-     * If the ID is not set (inferior or equal to 0), sets it to the next available ID.
+     * Finds activities by distance greater than or equal to the given value.
      *
-     * @param activity the activity to save
-     * @return the saved activity
-     * @throws ActivityAlreadyExistException if an activity with the same ID already exists
+     * @param distance the minimum distance
+     * @param pageable the pagination and sorting information
+     * @return a paginated list of activities with distance greater than or equal to the given value
      */
-    Activity save(Activity activity) throws ActivityAlreadyExistException;
+    @NonNull
+    Page<Activity> findByDistanceGreaterThanEqual(int distance, @NonNull Pageable pageable);
 
     /**
-     * Deletes an activity by its ID.
+     * Finds activities by maximum heart rate greater than the given value.
      *
-     * @param id the ID of the activity to delete
-     * @throws ActivityNotFoundException if the activity with the given ID is not found
+     * @param maxHeartRate the minimum value for maximum heart rate
+     * @param pageable the pagination and sorting information
+     * @return a paginated list of activities with maximum heart rate greater than the given value
      */
-    void deleteById(int id) throws ActivityNotFoundException;
+    @NonNull
+    Page<Activity> findByFreqMaxGreaterThan(int maxHeartRate, @NonNull Pageable pageable);
 
     /**
-     * Updates an existing activity.
+     * Checks if an activity exists by its description.
      *
-     * @param activity the activity to update
-     * @return the updated activity
-     * @throws ActivityNotFoundException if the activity with the given ID is not found
+     * @param description the description to check
+     * @return {@code true} if an activity with the given description exists, {@code false} otherwise
      */
-    Activity update(Activity activity) throws ActivityNotFoundException;
+    boolean existsByDescription(@NonNull String description);
 
     /**
-     * Counts the total number of activities.
+     * Finds an activity by its ID, including its associated ActivityData.
      *
-     * @return the number of activities
+     * @param id the ID of the activity to retrieve
+     * @return an {@link Optional} containing the activity with its ActivityData, or empty if not found
      */
-    int count();
+    @EntityGraph(attributePaths = "points")
+    @Query("SELECT a FROM Activity a WHERE a.id = :id")
+    Optional<Activity> findByIdWithActivityData(@NonNull Long id);
 }

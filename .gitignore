@@ -44,3 +44,5 @@ buildNumber.properties
 .classpath
 
 .idea
+application-dev.properties
+application-prod.properties

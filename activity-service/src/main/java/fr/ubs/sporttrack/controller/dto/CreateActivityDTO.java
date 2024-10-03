@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Max;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Data Transfer Object for creating an {@link Activity}.
@@ -47,7 +48,7 @@ public class CreateActivityDTO {
     @JsonProperty("data")
     @NotNull(message = "Data points cannot be null")
     @Size(min = 1, message = "At least one data point is required")
-    private List<ActivityData> points;
+    private Set<ActivityData> points;
 
     // Getters and setters
 
@@ -146,7 +147,7 @@ public class CreateActivityDTO {
      *
      * @return the data points of the activity
      */
-    public List<ActivityData> getPoints() {
+    public Set<ActivityData> getPoints() {
         return points;
     }
 
@@ -155,7 +156,7 @@ public class CreateActivityDTO {
      *
      * @param points the data points of the activity
      */
-    public void setPoints(List<ActivityData> points) {
+    public void setPoints(Set<ActivityData> points) {
         this.points = points;
     }
 

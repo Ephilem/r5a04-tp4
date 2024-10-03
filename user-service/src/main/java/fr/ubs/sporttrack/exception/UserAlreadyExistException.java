@@ -5,7 +5,7 @@ package fr.ubs.sporttrack.exception;
  *
  * @author Raphael AIME
  */
-public class UserAlreadyExistException extends Exception {
+public class UserAlreadyExistException extends RuntimeException {
     public UserAlreadyExistException() {
         super("User already exist");
     }

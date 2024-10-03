@@ -131,7 +131,7 @@ public class UserService {
         updatedUser.setId(id);
         updatedUser.setUsername(user.getUsername());
         updatedUser.setEmail(user.getEmail());
-        return userRepository.update(updatedUser);
+        return userRepository.save(updatedUser);
     }
 
     /**

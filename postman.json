@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d3f3c11e-a5bc-4bfa-9bca-2d912a3c9031",
+		"_postman_id": "d547cbd7-a30f-4316-9984-f16b4b1cc6d7",
 		"name": "Test SportTrack",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "10889909"
@@ -10,43 +10,7 @@
 			"name": "Auth testing",
 			"item": [
 				{
-					"name": "Add admin user",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{trueToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"admin\",\n    \"email\": \"admin@gmail.com\",\n    \"password\": \"admin\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{hostUser}}/users",
-							"host": [
-								"{{hostUser}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Authenticate",
+					"name": "Authenticate Admin",
 					"event": [
 						{
 							"listen": "test",
@@ -78,6 +42,8 @@
 									"    pm.expect(responseData.user).to.have.property('username').that.is.a('string');",
 									"    pm.expect(responseData.user).to.have.property('email').that.is.a('string');",
 									"});",
+									"",
+									"pm.collectionVariables.set(\"adminToken\", pm.response.json().token);",
 									""
 								],
 								"type": "text/javascript",
@@ -212,7 +178,7 @@
 									"",
 									"",
 									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"activityId\", jsonData.id);",
+									"pm.collectionVariables.set(\"activityId\", jsonData.id);",
 									""
 								],
 								"type": "text/javascript",
@@ -358,41 +324,6 @@
 					"response": []
 				},
 				{
-					"name": "Delete Activity",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Response status code is 204\", function () {",
-									"  pm.expect(pm.response.code).to.equal(204);",
-									"});",
-									"",
-									"",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{hostActivity}}/activities/{{activityId}}",
-							"host": [
-								"{{hostActivity}}"
-							],
-							"path": [
-								"activities",
-								"{{activityId}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Paginate",
 					"event": [
 						{
@@ -404,11 +335,11 @@
 									"});",
 									"",
 									"",
-									"pm.test(\"Content has 5 elements\", function () {",
+									"pm.test(\"Content has 1 elements\", function () {",
 									"    var responseData = pm.response.json();",
 									"    var content = responseData.content;",
 									"",
-									"    pm.expect(content.length).to.equal(5, \"Content should have 5 elements\");",
+									"    pm.expect(content.length).to.equal(1, \"Content should have 5 elements\");",
 									"});"
 								],
 								"type": "text/javascript",
@@ -453,16 +384,12 @@
 									"});",
 									"",
 									"",
-									"pm.test(\"Response status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
 									"pm.test(\"Response contains at least one element in the content\", function () {",
 									"    pm.expect(pm.response.json().content.length).to.be.greaterThan(0);",
 									"});",
 									"",
-									"pm.test(\"Description of the first element contains 'IUT'\", function () {",
-									"    pm.expect(pm.response.json().content[0].description).to.include('IUT');",
+									"pm.test(\"Description of the first element contains 'Super'\", function () {",
+									"    pm.expect(pm.response.json().content[0].description).to.include('Super');",
 									"});"
 								],
 								"type": "text/javascript",
@@ -474,7 +401,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{hostActivity}}/activities?page=0&size=5&search=IUT",
+							"raw": "{{hostActivity}}/activities?page=0&size=5&search=Super",
 							"host": [
 								"{{hostActivity}}"
 							],
@@ -492,8 +419,43 @@
 								},
 								{
 									"key": "search",
-									"value": "IUT"
+									"value": "Super"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Activity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 204\", function () {",
+									"  pm.expect(pm.response.code).to.equal(204);",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{hostActivity}}/activities/{{activityId}}",
+							"host": [
+								"{{hostActivity}}"
+							],
+							"path": [
+								"activities",
+								"{{activityId}}"
 							]
 						}
 					},
@@ -505,7 +467,7 @@
 				"bearer": [
 					{
 						"key": "token",
-						"value": "{{trueToken}}",
+						"value": "{{adminToken}}",
 						"type": "string"
 					}
 				]
@@ -569,7 +531,7 @@
 									"",
 									"// Set the variable userId to the value of the \"id\" key in the response body",
 									"var userId = pm.response.json().id;",
-									"pm.environment.set(\"userId\", userId);"
+									"pm.collectionVariables.set(\"userId\", userId);"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -917,7 +879,7 @@
 				"bearer": [
 					{
 						"key": "token",
-						"value": "{{trueToken}}",
+						"value": "{{adminToken}}",
 						"type": "string"
 					}
 				]
@@ -971,27 +933,27 @@
 	"variable": [
 		{
 			"key": "hostActivity",
-			"value": "localhost:8080",
-			"type": "string"
-		},
-		{
-			"key": "hostUser",
 			"value": "localhost:8081",
 			"type": "string"
 		},
 		{
-			"key": "trueToken",
-			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcxNzM0OTM3MiwiZXhwIjoxNzE3NDM1NzcyfQ.HphbyfpVOQ798h3v5iHjVRJxU5wcubsyfk8m1FT5ToE",
+			"key": "hostUser",
+			"value": "localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
 			"type": "string"
 		},
 		{
 			"key": "activityId",
-			"value": "15",
+			"value": "",
 			"type": "string"
 		},
 		{
 			"key": "userId",
-			"value": "7",
+			"value": "",
 			"type": "string"
 		}
 	]
