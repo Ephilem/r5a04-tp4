@@ -107,3 +107,130 @@ mvn clean package
 ```
 
 Cela va créer les fichiers JAR dans les dossiers `target` des microservices.
+
+D'accord, je vais ajouter ces informations au README en deux parties distinctes. Voici comment je structurerais ces ajouts :
+
+
+## API Gateway
+
+Le projet inclut également une API Gateway qui agit comme un point d'entrée unique pour tous les microservices. L'API Gateway est configurée pour router les requêtes vers les services appropriés en fonction des chemins d'URL.
+
+### Configuration
+
+La configuration de l'API Gateway se trouve dans le fichier `application.yml`. Voici un exemple de configuration :
+
+```yaml
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/ms-user/**
+        - id: activity-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/ms-activity/**
+```
+
+### Lancement
+
+Pour lancer l'API Gateway, utilisez la même commande que pour les autres microservices :
+
+```bash
+mvn clean spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+L'API Gateway fonctionnera sur le port 8080 par défaut.
+
+## Docker
+
+Le projet est conteneurisé avec Docker pour faciliter le déploiement et l'exécution dans différents environnements.
+
+### Dockerfiles
+
+Il y a trois Dockerfiles dans le projet :
+
+1. `activity-service.Dockerfile`
+2. `user-service.Dockerfile`
+3. `api-gateway.Dockerfile`
+
+Chaque Dockerfile suit une structure similaire. Voici un exemple pour le service utilisateur (`user-service.Dockerfile`) :
+
+```dockerfile
+FROM maven:3.9.9-amazoncorretto-17-alpine AS build
+
+WORKDIR /app/user-service
+
+# parent pom
+COPY ./pom.xml ../pom.xml
+# copy user-service pom
+COPY ./user-service/pom.xml ./pom.xml
+COPY user-service/src ./src
+
+RUN mvn clean package -DskipTests
+
+
+FROM openjdk:17-jdk-alpine
+
+WORKDIR /app
+
+COPY --from=build /app/user-service/target/sporttrack-user-service.jar .
+
+CMD ["java", "-jar", "sporttrack-user-service.jar"]
+```
+
+Ce Dockerfile utilise une approche multi-stage pour d'abord construire l'application avec Maven, puis créer une image légère contenant uniquement le JAR de l'application et le JRE nécessaire pour l'exécuter.
+
+### Docker Compose
+
+Un fichier `docker-compose.yml` est fourni pour orchestrer le déploiement de tous les services. Il inclut :
+
+- L'API Gateway
+- Le service utilisateur
+- Le service d'activité
+- Les bases de données MariaDB pour chaque service
+
+Pour lancer l'ensemble de l'application avec Docker Compose, utilisez la commande suivante à la racine du projet :
+
+```bash
+docker compose up -d
+```
+
+Cela construira les images Docker si nécessaire et démarrera tous les conteneurs. L'application sera accessible via l'API Gateway sur le port 8080 de votre machine hôte.
+
+*Note si vous avez une ancienne version de Docker, vous pouvez utiliser la commande `docker-compose` à la place de `docker compose`.*
+
+Pour voir les logs de un ou plusieurs services, vous pouvez utiliser la commande suivante :
+
+```bash
+docker compose logs -f <service-name>
+```
+Sans préciser le nom du service, cela affichera les logs de tous les services.
+
+Cette structure de commande fonctionne aussi pour `up` et `down` pour démarrer et arrêter des services spécifiques ou tous les services.
+```bash
+docker compose up -d <service-name>
+docker compose down <service-name>
+```
+
+## Sécurisation des accès au backend
+
+Pour sécuriser les accès au backend, plusieurs niveaux de contrôle d'accès peuvent être mis en place. Dans la structure actuelle du projet, nous appliquons déjà le principe de "Zero Trust" où chaque microservice vérifie indépendamment le token JWT. C'est une bonne pratique, mais nous pouvons aller plus loin pour renforcer la sécurité.
+
+Voici les niveaux où le contrôle d'accès peut être mis en place :
+
+1. **Au niveau de l'API Gateway** : L'API Gateway peut servir de premier point de contrôle en vérifiant l'authenticité des tokens JWT avant de router les requêtes vers les microservices. Elle peut également implémenter des contrôles de rate limiting pour prévenir les attaques par déni de service.
+
+2. **Au niveau de chaque microservice** (comme c'est déjà le cas) : Chaque service vérifie indépendamment le token JWT, assurant ainsi une sécurité en profondeur. Les microservices peuvent implémenter des contrôles d'autorisation plus granulaires basés sur les rôles ou les permissions spécifiques à chaque service.
+
+3. **Au niveau du réseau** : Utiliser des réseaux virtuels privés (VPN) ou des sous-réseaux isolés pour les communications entre microservices. Mettre en place des pare-feu pour contrôler le trafic entrant et sortant.
+
+4. **Au niveau de l'infrastructure** : Utiliser des certificats SSL/TLS pour toutes les communications. Mettre en place une gestion centralisée des secrets (comme HashiCorp Vault) pour stocker de manière sécurisée les clés JWT et autres informations sensibles.
+
+5. **Logging et Monitoring** : Implémenter un système de logging centralisé pour suivre toutes les tentatives d'accès et les activités suspectes. Mettre en place des alertes pour détecter les comportements anormaux.
+
