@@ -29,14 +29,36 @@ Ils se trouvent dans le dossier `resources` de chaque microservice. Les valeurs 
 **Pour les deux microservices :**
 - `server.port` : Le port sur lequel le serveur écoute.
 - `spring.profiles.active` : Le profil actif (dev ou prod). (Est défini automatiquement par Maven si vous utiliser la commande `mvn spring-boot:run ...`)
-- `spring.datasource.*` : Configuration de la base de données MariaDB.
 - `jwt.secret` : La clé secrète pour les tokens JWT (doit être identique pour les deux microservices).
+
+- `spring.jpa.hibernate.ddl-auto` : La stratégie de génération de la base de données. (validate (par défaut), update, create, create-drop)
+- `spring.jpa.properties.hibernate.dialect` : Le dialecte de la base de données.
+- `spring.datasource.url` : L'URL de la base de données.
+- `spring.datasource.username` : Le nom d'utilisateur de la base de données.
+- `spring.datasource.password` : Le mot de passe de la base de données.
 
 **Pour le microservice d'utilisateurs :**
 - `admin.username` : Le nom d'utilisateur de l'administrateur créé automatiquement.
 - `admin.email` : L'email de l'administrateur créé automatiquement.
 - `admin.password` : Le mot de passe de l'administrateur créé automatiquement.
 - `admin.auto-create` : Créer automatiquement un utilisateur administrateur au démarrage à partir des valeurs ci-dessus. (true ou false)
+
+### Utilisation des variables d'environnement
+Certaines partie de la configuration peuvent être définies par des variables d'environnement. Par exemple, le port du serveur peut être défini par la variable `PORT`. Si la variable est définie, elle remplace la valeur par défaut. Cela permet de définir des valeurs spécifiques à l'environnement sans avoir à modifier les fichiers de configuration.
+
+Voici les autre variables d'environnement que vous pouvez définir :
+- `JWT_SECRET` : La clé secrète pour les tokens JWT (`jwt.secret`).
+- `ST_ADMIN_USERNAME` : Le nom d'utilisateur de l'administrateur créé automatiquement (`admin.username`).
+- `ST_ADMIN_EMAIL` : L'email de l'administrateur créé automatiquement (`admin.email`).
+- `ST_ADMIN_PASSWORD` : Le mot de passe de l'administrateur créé automatiquement (`admin.password`).
+- `AUTO_CREATE_ADMIN` : Créer automatiquement un utilisateur administrateur au démarrage à partir des valeurs ci-dessus (`admin.auto-create`).
+- `PORT` : Le port sur lequel le serveur écoute (`server.port`).
+- `DB_HOST` : L'hôte de la base de données (`spring.datasource.url`).
+- `DB_PORT` : Le port de la base de données (`spring.datasource.url`).
+- `DB_NAME` : Le nom de la base de données (`spring.datasource.url`).
+- `DB_USERNAME` : Le nom d'utilisateur de la base de données (`spring.datasource.username`).
+- `DB_PASSWORD` : Le mot de passe de la base de données (`spring.datasource.password`).
+- `DDL_AUTO` : La stratégie de génération de la base de données (`spring.jpa.hibernate.ddl-auto`).
 
 ## Utilisation
 
@@ -52,9 +74,9 @@ mvn clean spring-boot:run -Dspring-boot.run.profiles=prod
 
 ![console.png](screenshot/console.png)
 
-Les ports par défaut sont les suivants :
-- `activity-service` : 8080
-- `user-service` : 8081
+Les ports définie pour le profil de développement sont :
+- `activity-service` : 8081
+- `user-service` : 8080
 
 ## Fonctionnalités
 - CRUD sur les activités. (Pour le microservice d'activités)
@@ -73,7 +95,7 @@ Pour les tests, j'ai utilisé un outil utilisé en R4.02 : Postman.
 J'ai pu créer une série de tests pour chaque microservice.
 ![postman.png](./screenshot/postman.png)
 Un fichier `postman.json` est disponible pour que vous puissiez tester les endpoints. Après avoir importé le fichier dans Postman, vous pouvez exécuter la collection de tests. (Vérifier bien les variable de collection que vous venez d'importer)
-Dans ces variables, seul adminToken, activityId et userId sont PAS a modifier.
+Dans ces variables, seul `adminToken`, `activityId` et `userId` sont __PAS__ a modifier.
 Pour que les tests fonctionnent, il faut faire en sorte qu'il y a un utilisateur avec comme nom d'utilisateur `admin` et comme mot de passe `admin` (par défaut). C'est l'utilisateur créé automatiquement au démarrage du microservice d'utilisateurs si la propriété `admin.auto-create` est à `true` et en laissant les valeurs par défaut.
 
 

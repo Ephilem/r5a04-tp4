@@ -1,21 +1,115 @@
 services:
+
+#  api-gateway:
+#    build:
+#      context: ./api-gateway
+#      args:
+#        - JAR_FILE=target/*.jar
+#    image: ${DOCKER_REGISTRY-}api-gateway:${TAG:-latest}
+#    container_name: api-gateway
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - gateway-network
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=prod
+#      - USER_SERVICE_URL=http://user-service:8081
+#      - ACTIVITY_SERVICE_URL=http://activity-service:8082
+
+  user-service:
+    build:
+      context: .
+      dockerfile: ./user-service.Dockerfile
+    image: sporttrack-user-service:latest
+    container_name: user-service
+    ports:
+      - "8080:8080"
+    networks:
+      - gateway-network
+      - user-db-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://user-db:3306/user_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=passwordsupersecure
+      - DDL_AUTO=update
+      - ST_ADMIN_USERNAME=admin
+      - ST_ADMIN_EMAIL=admin@example.com
+      - ST_ADMIN_PASSWORD=admin
+      - AUTO_CREATE_ADMIN=true
+      - JWT_SECRET=kGD4XJh599PjvqNrJNWrLX3wWR60e+xvJIAXl5eWJQE=
+    depends_on:
+      user-db:
+        condition: service_healthy
+
+  activity-service:
+    build:
+      context: .
+      dockerfile: ./activity-service.Dockerfile
+    image: sporttrack-activity-service:latest
+    container_name: activity-service
+    ports:
+      - "8081:8080"
+    networks:
+      - gateway-network
+      - activity-db-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://activity-db:3306/activity_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=passwordsupersecure
+      - DDL_AUTO=update
+      - JWT_SECRET=kGD4XJh599PjvqNrJNWrLX3wWR60e+xvJIAXl5eWJQE=
+    depends_on:
+      activity-db:
+        condition: service_healthy
+
   user-db:
     image: mariadb:latest
     container_name: user-db
-    ports:
-      - "3350:3306"
+    networks:
+      - user-db-network
     environment:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: user_db
-        MYSQL_USER: user
-        MYSQL_PASSWORD: passwordsupersecure
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: passwordsupersecure
+    volumes:
+      - user-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   activity-db:
     image: mariadb:latest
     container_name: activity-db
-    ports:
-      - "3351:3306"
+    networks:
+      - activity-db-network
     environment:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: activity_db
-        MYSQL_USER: user
-        MYSQL_PASSWORD: passwordsupersecure
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: activity_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: passwordsupersecure
+    volumes:
+      - activity-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  gateway-network:
+    driver: bridge
+  user-db-network:
+    driver: bridge
+  activity-db-network:
+    driver: bridge
+
+volumes:
+  user-db-data:
+  activity-db-data:
