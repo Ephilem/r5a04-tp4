@@ -88,6 +88,8 @@ services:
     container_name: activity-db
     networks:
       - activity-db-network
+    ports:
+      - "3939:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: activity_db
