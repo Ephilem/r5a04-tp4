@@ -22,9 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
  * CRUD Controller for managing {@link User} entities.
  * Provides endpoints to create, retrieve, and delete users.
@@ -62,13 +59,11 @@ public class UserController {
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
             @RequestParam(value = "search", required = false) String search) {
 
-        Page<User> users = (search == null || search.isBlank()) ?
+        Page<UserDTO> users = (search == null || search.isBlank()) ?
                 userService.findAll(pageable) :
                 userService.searchUsersByUsername(search, pageable);
 
-        Page<UserDTO> userDTOs = users.map(UserDTO::new);
-
-        return ResponseEntity.ok(userDTOs);
+        return ResponseEntity.ok(users);
     }
 
     /**
@@ -87,7 +82,6 @@ public class UserController {
     @GetMapping(path = "/{id}", produces = "application/json")
     public ResponseEntity<UserDTO> getUserById(@PathVariable int id) throws UserNotFoundException {
         return userService.getUser(id)
-                .map(UserDTO::new)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
@@ -102,13 +96,12 @@ public class UserController {
     @Operation(summary = "Create a new user", tags = {"User Management"})
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CreateUserDTO.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "409", description = "Conflict: User already exists")
     })
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody CreateUserDTO user) throws UserAlreadyExistException {
-        User savedUser = userService.saveUser(user.toUser());
-        return new ResponseEntity<>(new UserDTO(savedUser), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.saveUser(user.toUser()), HttpStatus.CREATED);
     }
 
     /**
@@ -122,13 +115,12 @@ public class UserController {
     @Operation(summary = "Update a user", tags = {"User Management"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UpdateUserDTO.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PutMapping(path = "/{id}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<UserDTO> updateUser(@PathVariable int id, @Valid @RequestBody UpdateUserDTO user) throws UserNotFoundException {
-        User updatedUser = userService.updateUser(id, user);
-        return ResponseEntity.ok(new UserDTO(updatedUser));
+        return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
     /**

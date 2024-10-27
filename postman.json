@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d547cbd7-a30f-4316-9984-f16b4b1cc6d7",
+		"_postman_id": "9ee92dc4-1a90-432a-a84c-9abc852a9f24",
 		"name": "Test SportTrack",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "10889909"
@@ -933,12 +933,12 @@
 	"variable": [
 		{
 			"key": "hostActivity",
-			"value": "localhost:8081",
+			"value": "localhost:8080/ms-activity",
 			"type": "string"
 		},
 		{
 			"key": "hostUser",
-			"value": "localhost:8080",
+			"value": "localhost:8080/ms-user",
 			"type": "string"
 		},
 		{

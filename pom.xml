@@ -26,6 +26,7 @@
     <module>activity-service</module>
     <module>user-service</module>
     <module>api-gateway</module>
+      <module>eureka-server</module>
   </modules>
 
   <!-- Force version for all modules -->
@@ -69,6 +70,26 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-cache</artifactId>
+        <version>${spring-boot.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>3.1.8</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+        <version>${spring-boot.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+        <version>1.13.2</version>
+      </dependency>
 
       <!-- JWT Dependencies -->
       <dependency>
@@ -111,6 +132,18 @@
         <groupId>org.mariadb.jdbc</groupId>
         <artifactId>mariadb-java-client</artifactId>
         <version>3.4.1</version>
+      </dependency>
+
+      <!-- Load Balancer -->
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        <version>4.1.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+        <version>3.1.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

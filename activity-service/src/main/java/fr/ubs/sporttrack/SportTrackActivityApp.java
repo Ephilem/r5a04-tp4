@@ -4,6 +4,7 @@ package fr.ubs.sporttrack;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * Starting point of the activity microservice
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
  * @author Raphael AIME
  */
 @SpringBootApplication
+@EnableDiscoveryClient
 public class SportTrackActivityApp {
 
     public static void main(String[] args){
