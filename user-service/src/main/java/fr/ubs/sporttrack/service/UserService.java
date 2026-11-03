@@ -6,7 +6,10 @@ import fr.ubs.sporttrack.exception.UserAlreadyExistException;
 import fr.ubs.sporttrack.exception.UserNotFoundException;
 import fr.ubs.sporttrack.model.User;
 import fr.ubs.sporttrack.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,13 +34,14 @@ import java.util.stream.Collectors;
 @CacheConfig(cacheNames = "users")
 public class UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     /**
      * Constructs a {@code UserService} with the specified {@link UserRepository}.
      * Initializes the {@link PasswordEncoder} for encoding passwords.
-     *
      * @param userRepository the repository used for accessing user data
      * @param passwordEncoder the encoder used for password hashing
      */
@@ -198,6 +202,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<UserDTO> validateUser(String username, String password) {
         Optional<User> user = userRepository.findByUsername(username);
+
         if (user.isPresent()) {
             CompletableFuture<Boolean> isValid = CompletableFuture
                     .supplyAsync(() -> passwordEncoder.matches(password, user.get().getPassword()));

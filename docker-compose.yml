@@ -1,14 +1,4 @@
 services:
-  eureka-server:
-    build:
-      context: .
-      dockerfile: ./eureka-server.Dockerfile
-    image: sporttrack-eureka-server:latest
-    container_name: eureka-server
-    ports:
-      - "8761:8761"
-    networks:
-      - gateway-network
 
   api-gateway:
     build:
@@ -24,8 +14,6 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - USER_SERVICE_URL=http://user-service:8080
       - ACTIVITY_SERVICE_URL=http://activity-service:8080
-    depends_on:
-      - eureka-server
 
   user-service:
     build:
@@ -35,7 +23,7 @@ services:
 #    ports:
 #      - "8081:8080"
     deploy:
-      replicas: 2
+      replicas: 10
     networks:
       - gateway-network
       - user-db-network
@@ -50,14 +38,9 @@ services:
       - ST_ADMIN_PASSWORD=admin
       - AUTO_CREATE_ADMIN=true
       - JWT_SECRET=kGD4XJh599PjvqNrJNWrLX3wWR60e+xvJIAXl5eWJQE=
-      - SERVICE_NAME=user-service
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - EUREKA_INSTANCE_IP_ADDRESS=user-service
     depends_on:
       user-db:
         condition: service_healthy
-      eureka-server:
-        condition: service_started
 
   activity-service:
     build:
@@ -78,20 +61,17 @@ services:
       - SPRING_DATASOURCE_PASSWORD=passwordsupersecure
       - DDL_AUTO=update
       - JWT_SECRET=kGD4XJh599PjvqNrJNWrLX3wWR60e+xvJIAXl5eWJQE=
-      - SERVICE_NAME=activity-service
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - EUREKA_INSTANCE_IP_ADDRESS=activity-service
     depends_on:
       activity-db:
         condition: service_healthy
-      eureka-server:
-        condition: service_started
 
   user-db:
     image: mariadb:latest
     container_name: user-db
     networks:
       - user-db-network
+    ports:
+      - "3939:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: user_db
